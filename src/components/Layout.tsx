@@ -67,7 +67,7 @@ export default function Layout() {
             <span className="text-ink-700">/</span>
             <span>ALLECT AI LAB</span>
             <span className="text-ink-700">/</span>
-            <span>v0.2.0</span>
+            <span>v0.3.0</span>
           </div>
           <div className="flex items-center gap-4">
             <span>Internal — not for client distribution</span>
