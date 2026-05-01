@@ -1,9 +1,14 @@
 import { useParams, Link } from 'react-router-dom';
-import { useState } from 'react';
+import { useMemo, useState } from 'react';
 import { workflowBySlug, WORKFLOWS } from '../data/workflows';
+import { WORKFLOW_PARAMS, defaultParamsFor } from '../data/workflowParams';
 import UploadZone from '../components/UploadZone';
+import PromptInput from '../components/PromptInput';
+import ParameterControls from '../components/ParameterControls';
+import ProgressBar from '../components/ProgressBar';
+import OutputDisplay from '../components/OutputDisplay';
 import { createJob, useJobs } from '../store/jobs';
-import JobCard from '../components/JobCard';
+import type { ParamValue } from '../types';
 
 const ETA_MAP: Record<string, number> = {
   'image-to-video': 180,
@@ -14,11 +19,23 @@ export default function WorkflowDetail() {
   const { slug } = useParams();
   const w = slug ? workflowBySlug(slug) : undefined;
   const allJobs = useJobs();
-  const jobsForFlow = allJobs.filter((j) => j.workflow === slug).slice(0, 5);
 
   const [presetId, setPresetId] = useState<string | null>(
     w?.presets?.[0]?.id ?? null,
   );
+  const [prompt, setPrompt] = useState('');
+  const [paramValues, setParamValues] = useState<Record<string, ParamValue>>(
+    () => (w ? defaultParamsFor(w.slug) : {}),
+  );
+  const [latestJobId, setLatestJobId] = useState<string | null>(null);
+
+  const activeJob = useMemo(() => {
+    if (!w) return null;
+    if (latestJobId) {
+      return allJobs.find((j) => j.id === latestJobId) ?? null;
+    }
+    return allJobs.find((j) => j.workflow === w.slug) ?? null;
+  }, [allJobs, latestJobId, w]);
 
   if (!w) {
     return (
@@ -32,16 +49,18 @@ export default function WorkflowDetail() {
   }
 
   const handleFile = (file: File, dataUrl: string) => {
-    createJob({
+    const job = createJob({
       workflow: w.slug,
       presetId,
+      prompt: prompt.trim() || null,
+      params: paramValues,
       file,
       thumbDataUrl: dataUrl,
       etaSeconds: ETA_MAP[w.slug] ?? 90,
     });
+    setLatestJobId(job.id);
   };
 
-  const otherFlows = WORKFLOWS.filter((x) => x.slug !== w.slug && x.status !== 'soon');
   const activePreset = w.presets?.find((p) => p.id === presetId);
 
   return (
@@ -57,32 +76,34 @@ export default function WorkflowDetail() {
       </Link>
 
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-10">
-        {/* Left: header + upload */}
-        <div className="lg:col-span-8">
-          <div className="flex items-center gap-3 mb-3">
-            <span className="font-mono text-[11px] text-ink-500 tracking-widest">
-              0{w.index} / {WORKFLOWS.length}
-            </span>
-            <span
-              className={`text-[10px] font-mono uppercase tracking-wider px-2 py-0.5 rounded-full border ${
-                w.status === 'live'
-                  ? 'bg-accent/10 text-accent border-accent/30'
-                  : 'bg-ink-800 text-ink-300 border-ink-700'
-              }`}
-            >
-              {w.status}
-            </span>
-          </div>
+        {/* Left: input → progress → output */}
+        <div className="lg:col-span-8 space-y-8">
+          <header>
+            <div className="flex items-center gap-3 mb-3">
+              <span className="font-mono text-[11px] text-ink-500 tracking-widest">
+                0{w.index} / {WORKFLOWS.length}
+              </span>
+              <span
+                className={`text-[10px] font-mono uppercase tracking-wider px-2 py-0.5 rounded-full border ${
+                  w.status === 'live'
+                    ? 'bg-accent/10 text-accent border-accent/30'
+                    : 'bg-ink-800 text-ink-300 border-ink-700'
+                }`}
+              >
+                {w.status}
+              </span>
+            </div>
 
-          <h1 className="text-4xl lg:text-5xl tracking-tightest text-balance mb-4">
-            {w.name}
-          </h1>
-          <p className="text-[15px] text-ink-300 max-w-2xl text-balance leading-relaxed mb-8">
-            {w.description}
-          </p>
+            <h1 className="text-4xl lg:text-5xl tracking-tightest text-balance mb-4">
+              {w.name}
+            </h1>
+            <p className="text-[15px] text-ink-300 max-w-2xl text-balance leading-relaxed">
+              {w.description}
+            </p>
+          </header>
 
           {w.presets && w.presets.length > 0 && (
-            <div className="mb-8">
+            <div>
               <div className="text-[11px] font-mono uppercase tracking-widest text-ink-500 mb-3">
                 Preset
               </div>
@@ -109,82 +130,48 @@ export default function WorkflowDetail() {
             </div>
           )}
 
-          <UploadZone
-            onFile={handleFile}
-            hint={`${w.inputLabel} · typical render ${w.typicalTime}`}
-          />
-
-          {jobsForFlow.length > 0 && (
-            <div className="mt-12">
-              <h2 className="text-lg tracking-tight mb-4">
-                Recent in this workflow
-              </h2>
-              <div className="space-y-3">
-                {jobsForFlow.map((j) => (
-                  <JobCard key={j.id} job={j} />
-                ))}
-              </div>
+          {/* Input */}
+          <section>
+            <div className="text-[11px] font-mono uppercase tracking-widest text-ink-500 mb-3">
+              Input
             </div>
-          )}
+            <UploadZone
+              onFile={handleFile}
+              hint={`${w.inputLabel} · typical render ${w.typicalTime}`}
+            />
+          </section>
+
+          {/* Progress */}
+          <section>
+            <ProgressBar job={activeJob} />
+          </section>
+
+          {/* Output */}
+          <section>
+            <div className="text-[11px] font-mono uppercase tracking-widest text-ink-500 mb-3">
+              Output
+            </div>
+            <OutputDisplay workflow={w} job={activeJob} />
+          </section>
         </div>
 
-        {/* Right: meta */}
+        {/* Right: prompt + parameters */}
         <aside className="lg:col-span-4 space-y-6">
-          <div className="rounded-xl border border-ink-800 bg-ink-900/40 p-5">
-            <div className="text-[11px] font-mono uppercase tracking-widest text-ink-500 mb-3">
-              Flow
-            </div>
-            <ol className="space-y-3 text-[13px] text-ink-300">
-              <li className="flex gap-3">
-                <span className="font-mono text-ink-500 w-4">1</span>
-                <span>Drop {w.inputLabel.toLowerCase()}.</span>
-              </li>
-              <li className="flex gap-3">
-                <span className="font-mono text-ink-500 w-4">2</span>
-                <span>Agent picks it up, runs the workflow on the studio render box.</span>
-              </li>
-              <li className="flex gap-3">
-                <span className="font-mono text-ink-500 w-4">3</span>
-                <span>{w.outputLabel} appears below, ready to download.</span>
-              </li>
-            </ol>
-          </div>
+          <PromptInput
+            value={prompt}
+            onChange={setPrompt}
+            placeholder={w.promptPlaceholder}
+          />
 
-          <div className="rounded-xl border border-ink-800 bg-ink-900/40 p-5">
-            <div className="text-[11px] font-mono uppercase tracking-widest text-ink-500 mb-3">
-              Tags
-            </div>
-            <div className="flex flex-wrap gap-1.5">
-              {w.tags.map((tag) => (
-                <span
-                  key={tag}
-                  className="px-2 py-1 text-[11px] font-mono text-ink-300 bg-ink-800/80 border border-ink-700 rounded"
-                >
-                  {tag}
-                </span>
-              ))}
-            </div>
-          </div>
-
-          {otherFlows.length > 0 && (
-            <div className="rounded-xl border border-ink-800 bg-ink-900/40 p-5">
-              <div className="text-[11px] font-mono uppercase tracking-widest text-ink-500 mb-3">
-                Other workflows
-              </div>
-              <div className="space-y-2">
-                {otherFlows.map((f) => (
-                  <Link
-                    key={f.slug}
-                    to={`/w/${f.slug}`}
-                    className="flex items-center justify-between py-2 border-b border-ink-800/60 last:border-0 hover:text-accent transition-colors text-[13px]"
-                  >
-                    <span>{f.name}</span>
-                    <span className="font-mono text-[11px] text-ink-500">0{f.index}</span>
-                  </Link>
-                ))}
-              </div>
-            </div>
-          )}
+          <ParameterControls
+            workflowName={w.name}
+            workflowIndex={w.index}
+            specs={WORKFLOW_PARAMS[w.slug]}
+            values={paramValues}
+            onChange={(id, value) =>
+              setParamValues((prev) => ({ ...prev, [id]: value }))
+            }
+          />
         </aside>
       </div>
     </div>

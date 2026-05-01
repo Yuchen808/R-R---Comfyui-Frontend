@@ -14,11 +14,51 @@ export interface Workflow {
   description: string;
   inputLabel: string;
   outputLabel: string;
+  outputKind: 'image' | 'video';
   typicalTime: string;
   status: 'live' | 'beta' | 'soon';
   tags: string[];
+  promptPlaceholder: string;
   presets?: WorkflowPreset[];
 }
+
+export type ParamValue = string | number | boolean;
+
+export type ParamSpec =
+  | {
+      id: string;
+      label: string;
+      type: 'slider';
+      min: number;
+      max: number;
+      step: number;
+      default: number;
+      unit?: string;
+      hint?: string;
+    }
+  | {
+      id: string;
+      label: string;
+      type: 'select';
+      options: string[];
+      default: string;
+      hint?: string;
+    }
+  | {
+      id: string;
+      label: string;
+      type: 'toggle';
+      default: boolean;
+      hint?: string;
+    }
+  | {
+      id: string;
+      label: string;
+      type: 'text';
+      default: string;
+      placeholder?: string;
+      hint?: string;
+    };
 
 export type JobStatus =
   | 'queued'
@@ -31,6 +71,8 @@ export interface Job {
   id: string;
   workflow: WorkflowSlug;
   presetId: string | null;
+  prompt: string | null;
+  params: Record<string, ParamValue>;
   fileName: string;
   fileSize: number;
   submittedAt: number;

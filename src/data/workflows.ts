@@ -10,9 +10,12 @@ export const WORKFLOWS: Workflow[] = [
       'Drop a static render or photograph. Returns a short looping video clip — subtle camera movement, ambient motion, atmosphere. Use for client decks, reels, and presentation looping.',
     inputLabel: 'Still image',
     outputLabel: 'Looping video',
+    outputKind: 'video',
     typicalTime: '~3 min',
     status: 'live',
     tags: ['video', 'pitch', 'reel'],
+    promptPlaceholder:
+      'Describe the motion. e.g. slow camera dolly forward through the room, daylight slowly shifting toward dusk, soft fabric drift on the curtains.',
   },
   {
     slug: 'instruct-image',
@@ -23,9 +26,12 @@ export const WORKFLOWS: Workflow[] = [
       'Tell the model what to change in plain English. Two studio-tuned presets: AI photoshop for in-place edits, Day to Night for time-of-day relighting.',
     inputLabel: 'Image + instruction',
     outputLabel: 'Edited image',
+    outputKind: 'image',
     typicalTime: '~90s',
     status: 'live',
     tags: ['edit', 'iteration'],
+    promptPlaceholder:
+      'Describe the change. e.g. swap the marble fireplace for travertine, relight as evening with warm lamps, remove the artwork above the sofa.',
     presets: [
       {
         id: 'ai-photoshop',
