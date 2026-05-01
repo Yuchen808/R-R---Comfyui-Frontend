@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
-import type { Job, ParamValue, WorkflowSlug } from '../types';
+import type { Job, JobInputFile, ParamValue, WorkflowSlug } from '../types';
 
-const STORAGE_KEY = 'rr-comfy-jobs-v3';
+const STORAGE_KEY = 'rr-comfy-jobs-v4';
 const listeners = new Set<() => void>();
 let cache: Job[] | null = null;
 
@@ -39,8 +39,7 @@ export const createJob = (params: {
   presetId: string | null;
   prompt: string | null;
   params: Record<string, ParamValue>;
-  file: File;
-  thumbDataUrl: string;
+  inputs: Record<string, JobInputFile>;
   etaSeconds: number;
 }): Job => {
   const job: Job = {
@@ -49,14 +48,12 @@ export const createJob = (params: {
     presetId: params.presetId,
     prompt: params.prompt,
     params: params.params,
-    fileName: params.file.name,
-    fileSize: params.file.size,
+    inputs: params.inputs,
     submittedAt: Date.now(),
     status: 'queued',
     progress: 0,
     etaSeconds: params.etaSeconds,
     resultUrl: null,
-    thumbDataUrl: params.thumbDataUrl,
     errorMessage: null,
   };
   persist([job, ...load()]);
@@ -99,11 +96,13 @@ const simulateJob = (id: string, totalSeconds: number) => {
       });
       setTimeout(tick, 350);
     } else {
+      const current = load().find((j) => j.id === id);
+      const mainInput = current?.inputs.main;
       updateJob(id, {
         progress: 100,
         status: 'complete',
         etaSeconds: 0,
-        resultUrl: load().find((j) => j.id === id)?.thumbDataUrl ?? null,
+        resultUrl: mainInput?.dataUrl ?? null,
       });
     }
   };

@@ -7,8 +7,9 @@ import PromptInput from '../components/PromptInput';
 import ParameterControls from '../components/ParameterControls';
 import ProgressBar from '../components/ProgressBar';
 import OutputDisplay from '../components/OutputDisplay';
+import RenderButton from '../components/RenderButton';
 import { createJob, useJobs } from '../store/jobs';
-import type { ParamValue } from '../types';
+import type { JobInputFile, ParamValue } from '../types';
 
 const ETA_MAP: Record<string, number> = {
   'image-to-video': 180,
@@ -27,6 +28,7 @@ export default function WorkflowDetail() {
   const [paramValues, setParamValues] = useState<Record<string, ParamValue>>(
     () => (w ? defaultParamsFor(w.slug) : {}),
   );
+  const [inputs, setInputs] = useState<Record<string, JobInputFile | null>>({});
   const [latestJobId, setLatestJobId] = useState<string | null>(null);
 
   const activeJob = useMemo(() => {
@@ -48,14 +50,29 @@ export default function WorkflowDetail() {
     );
   }
 
-  const handleFile = (file: File, dataUrl: string) => {
+  const requiredSlots = w.imageInputs.filter((s) => s.required);
+  const missingCount = requiredSlots.filter((s) => !inputs[s.id]).length;
+  const isBusy =
+    activeJob !== null &&
+    (activeJob.status === 'queued' ||
+      activeJob.status === 'syncing' ||
+      activeJob.status === 'processing');
+
+  const canRender = missingCount === 0 && !isBusy;
+
+  const handleRender = () => {
+    if (!canRender) return;
+    const filledInputs: Record<string, JobInputFile> = {};
+    for (const slot of w.imageInputs) {
+      const v = inputs[slot.id];
+      if (v) filledInputs[slot.id] = v;
+    }
     const job = createJob({
       workflow: w.slug,
       presetId,
       prompt: prompt.trim() || null,
       params: paramValues,
-      file,
-      thumbDataUrl: dataUrl,
+      inputs: filledInputs,
       etaSeconds: ETA_MAP[w.slug] ?? 90,
     });
     setLatestJobId(job.id);
@@ -76,7 +93,7 @@ export default function WorkflowDetail() {
       </Link>
 
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-10">
-        {/* Left: input → progress → output */}
+        {/* Left: input → render → progress → output */}
         <div className="lg:col-span-8 space-y-8">
           <header>
             <div className="flex items-center gap-3 mb-3">
@@ -130,21 +147,50 @@ export default function WorkflowDetail() {
             </div>
           )}
 
-          {/* Input */}
+          {/* Input slots */}
           <section>
             <div className="text-[11px] font-mono uppercase tracking-widest text-ink-500 mb-3">
               Input
             </div>
-            <UploadZone
-              onFile={handleFile}
-              hint={`${w.inputLabel} · typical render ${w.typicalTime}`}
+            <div
+              className={`grid gap-4 ${
+                w.imageInputs.length > 1
+                  ? 'grid-cols-1 sm:grid-cols-2'
+                  : 'grid-cols-1'
+              }`}
+            >
+              {w.imageInputs.map((slot) => (
+                <UploadZone
+                  key={slot.id}
+                  label={slot.label}
+                  description={slot.description}
+                  value={inputs[slot.id] ?? null}
+                  onChange={(next) =>
+                    setInputs((prev) => ({ ...prev, [slot.id]: next }))
+                  }
+                  hint={`typical render ${w.typicalTime}`}
+                  disabled={isBusy}
+                />
+              ))}
+            </div>
+          </section>
+
+          {/* Render */}
+          <section>
+            <RenderButton
+              disabled={!canRender}
+              busy={isBusy}
+              missingCount={missingCount}
+              onClick={handleRender}
             />
           </section>
 
           {/* Progress */}
-          <section>
-            <ProgressBar job={activeJob} />
-          </section>
+          {activeJob && (
+            <section>
+              <ProgressBar job={activeJob} />
+            </section>
+          )}
 
           {/* Output */}
           <section>

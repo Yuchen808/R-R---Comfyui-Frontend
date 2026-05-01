@@ -16,6 +16,14 @@ export const WORKFLOWS: Workflow[] = [
     tags: ['video', 'pitch', 'reel'],
     promptPlaceholder:
       'Describe the motion. e.g. slow camera dolly forward through the room, daylight slowly shifting toward dusk, soft fabric drift on the curtains.',
+    imageInputs: [
+      {
+        id: 'main',
+        label: 'Image',
+        description: 'Still render or photograph',
+        required: true,
+      },
+    ],
   },
   {
     slug: 'instruct-image',
@@ -24,7 +32,7 @@ export const WORKFLOWS: Workflow[] = [
     short: 'Edit an image by instruction',
     description:
       'Tell the model what to change in plain English. Two studio-tuned presets: AI photoshop for in-place edits, Day to Night for time-of-day relighting.',
-    inputLabel: 'Image + instruction',
+    inputLabel: 'Image + reference',
     outputLabel: 'Edited image',
     outputKind: 'image',
     typicalTime: '~90s',
@@ -32,6 +40,20 @@ export const WORKFLOWS: Workflow[] = [
     tags: ['edit', 'iteration'],
     promptPlaceholder:
       'Describe the change. e.g. swap the marble fireplace for travertine, relight as evening with warm lamps, remove the artwork above the sofa.',
+    imageInputs: [
+      {
+        id: 'main',
+        label: 'Image',
+        description: 'The image you want to edit',
+        required: true,
+      },
+      {
+        id: 'reference',
+        label: 'Reference',
+        description: 'Style reference — palette, lighting, materiality',
+        required: true,
+      },
+    ],
     presets: [
       {
         id: 'ai-photoshop',

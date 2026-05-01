@@ -17,12 +17,13 @@ const formatSize = (bytes: number): string => {
 
 export default function JobCard({ job }: { job: Job }) {
   const w = workflowBySlug(job.workflow);
+  const main = job.inputs.main;
   return (
     <div className="group relative flex gap-4 p-4 rounded-xl border border-ink-800 bg-ink-900/40 hover:bg-ink-900/70 transition-colors">
       <div className="relative h-20 w-20 flex-shrink-0 overflow-hidden rounded-lg bg-ink-800 border border-ink-700">
-        {job.thumbDataUrl && (
+        {main?.dataUrl && (
           <img
-            src={job.thumbDataUrl}
+            src={main.dataUrl}
             alt=""
             className={`h-full w-full object-cover transition-all ${
               job.status === 'complete' ? '' : 'opacity-40'
@@ -40,7 +41,7 @@ export default function JobCard({ job }: { job: Job }) {
         <div className="flex items-center justify-between gap-3 mb-1">
           <Link
             to={`/w/${job.workflow}`}
-            className="font-display text-[15px] tracking-tight text-ink-100 hover:text-accent transition-colors"
+            className="text-[15px] tracking-tight text-ink-100 hover:text-accent transition-colors"
           >
             {w?.name ?? job.workflow}
           </Link>
@@ -48,9 +49,13 @@ export default function JobCard({ job }: { job: Job }) {
         </div>
 
         <div className="flex items-center gap-2 text-[12px] font-mono text-ink-500 mb-3 truncate">
-          <span className="truncate">{job.fileName}</span>
-          <span className="text-ink-700">·</span>
-          <span>{formatSize(job.fileSize)}</span>
+          <span className="truncate">{main?.fileName ?? '—'}</span>
+          {main && (
+            <>
+              <span className="text-ink-700">·</span>
+              <span>{formatSize(main.fileSize)}</span>
+            </>
+          )}
           <span className="text-ink-700">·</span>
           <span>{formatTime(job.submittedAt)}</span>
         </div>

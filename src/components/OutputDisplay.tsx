@@ -20,7 +20,7 @@ export default function OutputDisplay({ workflow, job }: Props) {
           {workflow.outputLabel} appears here
         </div>
         <div className="text-[12px] font-mono text-ink-500">
-          Drop {workflow.inputLabel.toLowerCase()} above to start
+          Drop image{workflow.imageInputs.length > 1 ? 's' : ''} above + click Render
         </div>
       </div>
     );
@@ -40,13 +40,14 @@ export default function OutputDisplay({ workflow, job }: Props) {
   }
 
   const isLive = job.status === 'queued' || job.status === 'syncing' || job.status === 'processing';
+  const main = job.inputs.main;
 
   return (
     <div className="rounded-xl border border-ink-800 bg-ink-900/40 overflow-hidden relative">
       <div className="aspect-[16/10] relative bg-ink-950">
-        {job.thumbDataUrl && (
+        {main?.dataUrl && (
           <img
-            src={job.resultUrl ?? job.thumbDataUrl}
+            src={job.resultUrl ?? main.dataUrl}
             alt="Render output"
             className={`absolute inset-0 h-full w-full object-contain transition-opacity duration-500 ${
               isLive ? 'opacity-25' : 'opacity-100'
@@ -72,7 +73,7 @@ export default function OutputDisplay({ workflow, job }: Props) {
       {/* Footer with metadata */}
       <div className="px-4 py-3 border-t border-ink-800/60 flex items-center justify-between text-[11px] font-mono">
         <div className="flex items-center gap-2 text-ink-400 min-w-0">
-          <span className="truncate">{job.fileName}</span>
+          <span className="truncate">{main?.fileName ?? '—'}</span>
         </div>
         <div className="flex items-center gap-3 flex-shrink-0">
           {job.prompt && (

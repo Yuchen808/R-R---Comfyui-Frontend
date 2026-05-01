@@ -6,6 +6,13 @@ export interface WorkflowPreset {
   description: string;
 }
 
+export interface ImageInputSlot {
+  id: string;
+  label: string;
+  description?: string;
+  required: boolean;
+}
+
 export interface Workflow {
   slug: WorkflowSlug;
   index: number;
@@ -19,6 +26,7 @@ export interface Workflow {
   status: 'live' | 'beta' | 'soon';
   tags: string[];
   promptPlaceholder: string;
+  imageInputs: ImageInputSlot[];
   presets?: WorkflowPreset[];
 }
 
@@ -67,20 +75,24 @@ export type JobStatus =
   | 'complete'
   | 'failed';
 
+export interface JobInputFile {
+  fileName: string;
+  fileSize: number;
+  dataUrl: string;
+}
+
 export interface Job {
   id: string;
   workflow: WorkflowSlug;
   presetId: string | null;
   prompt: string | null;
   params: Record<string, ParamValue>;
-  fileName: string;
-  fileSize: number;
+  inputs: Record<string, JobInputFile>;
   submittedAt: number;
   status: JobStatus;
   progress: number;
   etaSeconds: number | null;
   resultUrl: string | null;
-  thumbDataUrl: string | null;
   errorMessage: string | null;
 }
 
