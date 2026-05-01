@@ -1,3 +1,60 @@
+/* Maison Neue — drop licensed font files into /public/fonts/ to activate.
+   Falls back to Helvetica Neue / Arial when files are missing. */
+@font-face {
+  font-family: 'Maison Neue';
+  src:
+    url('/fonts/MaisonNeue-Book.woff2') format('woff2'),
+    url('/fonts/MaisonNeue-Book.woff') format('woff');
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+@font-face {
+  font-family: 'Maison Neue';
+  src:
+    url('/fonts/MaisonNeue-BookItalic.woff2') format('woff2'),
+    url('/fonts/MaisonNeue-BookItalic.woff') format('woff');
+  font-weight: 400;
+  font-style: italic;
+  font-display: swap;
+}
+@font-face {
+  font-family: 'Maison Neue';
+  src:
+    url('/fonts/MaisonNeue-Medium.woff2') format('woff2'),
+    url('/fonts/MaisonNeue-Medium.woff') format('woff');
+  font-weight: 500;
+  font-style: normal;
+  font-display: swap;
+}
+@font-face {
+  font-family: 'Maison Neue';
+  src:
+    url('/fonts/MaisonNeue-Demi.woff2') format('woff2'),
+    url('/fonts/MaisonNeue-Demi.woff') format('woff');
+  font-weight: 600;
+  font-style: normal;
+  font-display: swap;
+}
+@font-face {
+  font-family: 'Maison Neue';
+  src:
+    url('/fonts/MaisonNeue-Bold.woff2') format('woff2'),
+    url('/fonts/MaisonNeue-Bold.woff') format('woff');
+  font-weight: 700;
+  font-style: normal;
+  font-display: swap;
+}
+@font-face {
+  font-family: 'Maison Neue Mono';
+  src:
+    url('/fonts/MaisonNeueMono-Regular.woff2') format('woff2'),
+    url('/fonts/MaisonNeueMono-Regular.woff') format('woff');
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
@@ -16,10 +73,9 @@
   }
 
   body {
-    font-family: 'PingFang SC', 'PingFang HK', 'Inter', system-ui, sans-serif;
+    font-family: 'Maison Neue', 'Helvetica Neue', Helvetica, Arial, system-ui, sans-serif;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
-    font-feature-settings: 'cv11', 'ss01';
   }
 
   ::selection {
@@ -27,7 +83,6 @@
     color: #0A0A0A;
   }
 
-  /* Hide scrollbar but keep scroll */
   .scrollbar-clean::-webkit-scrollbar {
     width: 6px;
     height: 6px;

@@ -1,9 +1,10 @@
-export type WorkflowSlug =
-  | 'plan-to-render'
-  | 'sketch-to-render'
-  | 'material-swap'
-  | 'detail-upscale'
-  | 'reference-stylize';
+export type WorkflowSlug = 'image-to-video' | 'instruct-image';
+
+export interface WorkflowPreset {
+  id: string;
+  name: string;
+  description: string;
+}
 
 export interface Workflow {
   slug: WorkflowSlug;
@@ -16,6 +17,7 @@ export interface Workflow {
   typicalTime: string;
   status: 'live' | 'beta' | 'soon';
   tags: string[];
+  presets?: WorkflowPreset[];
 }
 
 export type JobStatus =
@@ -28,6 +30,7 @@ export type JobStatus =
 export interface Job {
   id: string;
   workflow: WorkflowSlug;
+  presetId: string | null;
   fileName: string;
   fileSize: number;
   submittedAt: number;
@@ -37,4 +40,15 @@ export interface Job {
   resultUrl: string | null;
   thumbDataUrl: string | null;
   errorMessage: string | null;
+}
+
+export interface Project {
+  id: string;
+  name: string;
+  client: string;
+  location: string;
+  status: 'active' | 'archived';
+  hue: number;
+  renderCount: number;
+  updatedAt: string;
 }

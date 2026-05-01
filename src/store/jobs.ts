@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import type { Job, WorkflowSlug } from '../types';
 
-const STORAGE_KEY = 'rr-comfy-jobs-v1';
+const STORAGE_KEY = 'rr-comfy-jobs-v2';
 const listeners = new Set<() => void>();
 let cache: Job[] | null = null;
 
@@ -36,6 +36,7 @@ export const subscribeJobs = (fn: () => void): (() => void) => {
 
 export const createJob = (params: {
   workflow: WorkflowSlug;
+  presetId: string | null;
   file: File;
   thumbDataUrl: string;
   etaSeconds: number;
@@ -43,6 +44,7 @@ export const createJob = (params: {
   const job: Job = {
     id: `job_${Date.now().toString(36)}_${Math.random().toString(36).slice(2, 7)}`,
     workflow: params.workflow,
+    presetId: params.presetId,
     fileName: params.file.name,
     fileSize: params.file.size,
     submittedAt: Date.now(),

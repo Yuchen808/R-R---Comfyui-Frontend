@@ -3,8 +3,7 @@ import { useJobs } from '../store/jobs';
 
 const NAV = [
   { to: '/', label: 'Studio', end: true },
-  { to: '/queue', label: 'Queue' },
-  { to: '/about', label: 'About' },
+  { to: '/project', label: 'Project' },
 ];
 
 export default function Layout() {
@@ -20,7 +19,7 @@ export default function Layout() {
               <span className="absolute inset-0 rounded-full bg-accent" />
               <span className="absolute inset-0 rounded-full bg-accent animate-ping opacity-40" />
             </div>
-            <span className="font-display text-[15px] tracking-tight">
+            <span className="text-[15px] tracking-tight">
               R&amp;R <span className="text-ink-500">·</span>{' '}
               <span className="text-ink-300">ComfyUI Studio</span>
             </span>
@@ -41,7 +40,7 @@ export default function Layout() {
                 }
               >
                 {item.label}
-                {item.label === 'Queue' && live > 0 && (
+                {item.label === 'Project' && live > 0 && (
                   <span className="ml-1.5 inline-flex items-center justify-center min-w-[18px] h-[18px] px-1 rounded-full bg-accent text-ink-950 text-[10px] font-mono font-semibold">
                     {live}
                   </span>
@@ -68,10 +67,10 @@ export default function Layout() {
             <span className="text-ink-700">/</span>
             <span>ALLECT AI LAB</span>
             <span className="text-ink-700">/</span>
-            <span>v0.1.0</span>
+            <span>v0.2.0</span>
           </div>
           <div className="flex items-center gap-4">
-            <span>Internal tool — not for client distribution</span>
+            <span>Internal — not for client distribution</span>
           </div>
         </div>
       </footer>

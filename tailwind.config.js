@@ -4,9 +4,29 @@ export default {
   theme: {
     extend: {
       fontFamily: {
-        sans: ['"PingFang SC"', '"PingFang HK"', 'Inter', 'system-ui', 'sans-serif'],
-        display: ['"Söhne"', '"PP Neue Montreal"', 'Inter', 'system-ui', 'sans-serif'],
-        mono: ['"JetBrains Mono"', '"SF Mono"', 'monospace'],
+        sans: [
+          '"Maison Neue"',
+          '"Helvetica Neue"',
+          'Helvetica',
+          'Arial',
+          'system-ui',
+          'sans-serif',
+        ],
+        display: [
+          '"Maison Neue"',
+          '"Helvetica Neue"',
+          'Helvetica',
+          'Arial',
+          'system-ui',
+          'sans-serif',
+        ],
+        mono: [
+          '"Maison Neue Mono"',
+          '"JetBrains Mono"',
+          '"SF Mono"',
+          'ui-monospace',
+          'monospace',
+        ],
       },
       colors: {
         ink: {

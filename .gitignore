@@ -27,3 +27,9 @@ pnpm-debug.log*
 coverage
 
 *.tsbuildinfo
+
+# Licensed fonts — drop locally, do not commit
+public/fonts/*.woff
+public/fonts/*.woff2
+public/fonts/*.ttf
+public/fonts/*.otf

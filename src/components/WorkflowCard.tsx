@@ -15,7 +15,7 @@ export default function WorkflowCard({ w }: { w: Workflow }) {
   return (
     <Wrapper
       {...wrapperProps}
-      className={`group relative flex flex-col p-6 rounded-xl border border-ink-800 bg-ink-900/60 overflow-hidden transition-all ${
+      className={`group relative flex flex-col p-7 rounded-xl border border-ink-800 bg-ink-900/60 overflow-hidden transition-all ${
         isAvailable
           ? 'hover:border-ink-700 hover:bg-ink-900 hover:-translate-y-0.5'
           : 'opacity-60 cursor-not-allowed'
@@ -23,7 +23,7 @@ export default function WorkflowCard({ w }: { w: Workflow }) {
     >
       <div className="absolute -top-px left-6 right-6 h-px bg-gradient-to-r from-transparent via-accent/30 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
 
-      <div className="flex items-start justify-between mb-6">
+      <div className="flex items-start justify-between mb-8">
         <span className="font-mono text-[11px] text-ink-500 tracking-widest">
           0{w.index}
         </span>
@@ -40,12 +40,26 @@ export default function WorkflowCard({ w }: { w: Workflow }) {
         </span>
       </div>
 
-      <h3 className="font-display text-2xl tracking-tight text-balance mb-2">
+      <h3 className="text-3xl tracking-tight text-balance mb-2">
         {w.name}
       </h3>
       <p className="text-[13px] text-ink-400 mb-5 text-balance leading-relaxed">
         {w.short}
       </p>
+
+      {w.presets && w.presets.length > 0 && (
+        <div className="flex flex-wrap gap-1.5 mb-5">
+          {w.presets.map((p, i) => (
+            <span
+              key={p.id}
+              className="inline-flex items-center gap-1.5 px-2 py-1 text-[11px] font-mono text-ink-300 bg-ink-800/60 border border-ink-700 rounded"
+            >
+              <span className="text-ink-500">{i + 1}.</span>
+              {p.name}
+            </span>
+          ))}
+        </div>
+      )}
 
       <div className="mt-auto pt-5 border-t border-ink-800/80 flex items-center justify-between text-[11px] font-mono">
         <div className="flex items-center gap-2 text-ink-500">
