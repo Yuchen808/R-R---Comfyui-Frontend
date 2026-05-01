@@ -22,7 +22,7 @@ This will:
 2. Clone the repo to `C:\AI-Lab\app`
 3. Create a Python venv + `pip install` deps
 4. Download `cloudflared.exe`
-5. Verify `Z:\Shared\Rigby Cloud\24 - AI Lab\Input` is reachable
+5. Verify `R:\24 - AI Lab\Input` is reachable
 6. Start `bridge.py`, `watcher.py`, and `cloudflared tunnel` as hidden background processes
 7. Print a `https://xxx.trycloudflare.com` URL — **send this URL to Yuchen**
 
@@ -74,7 +74,7 @@ Invoke-RestMethod http://localhost:8000/api/health
 
 - Python 3.10+ in PATH (you should have this — ComfyUI installs Python)
 - ComfyUI running on `http://localhost:8188` (the watcher's `COMFY_URL`)
-- `Z:` drive mounted via Egnyte
+- `R:` drive mapped to the Rigby Cloud share (IT-setup machines have this by default; on a non-IT box, run `agent\deploy\map-r-drive.ps1` once)
 - Outbound HTTPS to `*.trycloudflare.com` allowed by your firewall (it should be)
 
 ## Troubleshooting
@@ -83,7 +83,7 @@ Invoke-RestMethod http://localhost:8000/api/health
 
 **Bridge port 8000 already in use**: Another process holds the port. `Get-NetTCPConnection -LocalPort 8000` to find it. Kill or change `BRIDGE_PORT` env var.
 
-**Watcher says "input folder does not exist"**: Egnyte client not running, or the path moved. Check `Z:\Shared\Rigby Cloud\24 - AI Lab\` exists.
+**Watcher says "input folder does not exist"**: R: drive not mapped. On an IT-setup machine R: is automatic; on a personal box run `C:\AI-Lab\app\agent\deploy\map-r-drive.ps1` once.
 
 **Renders fail with "Connection refused on 8188"**: ComfyUI isn't running. Start ComfyUI first, then re-run `start.ps1`.
 

@@ -16,8 +16,8 @@ Endpoints:
   GET  /api/health        — { input_dir, output_dir, watcher_alive }
 
 Env:
-  AI_LAB_INPUT  default: Z:\\Shared\\Rigby Cloud\\24 - AI Lab\\Input
-  AI_LAB_OUTPUT default: Z:\\Shared\\Rigby Cloud\\24 - AI Lab\\Output
+  AI_LAB_INPUT  default: R:\\24 - AI Lab\\Input
+  AI_LAB_OUTPUT default: R:\\24 - AI Lab\\Output
   BRIDGE_PORT   default: 8000
 """
 
@@ -43,8 +43,8 @@ except ImportError:
     sys.exit(1)
 
 
-INPUT_DIR = Path(os.environ.get("AI_LAB_INPUT", r"Z:\Shared\Rigby Cloud\24 - AI Lab\Input"))
-OUTPUT_DIR = Path(os.environ.get("AI_LAB_OUTPUT", r"Z:\Shared\Rigby Cloud\24 - AI Lab\Output"))
+INPUT_DIR = Path(os.environ.get("AI_LAB_INPUT", r"R:\24 - AI Lab\Input"))
+OUTPUT_DIR = Path(os.environ.get("AI_LAB_OUTPUT", r"R:\24 - AI Lab\Output"))
 BRIDGE_PORT = int(os.environ.get("BRIDGE_PORT", "8000"))
 
 

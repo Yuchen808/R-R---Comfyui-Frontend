@@ -137,11 +137,15 @@ if (Test-Path $Cloudflared) {
 }
 
 # ---------------------------------------------------------------------------
-# 6. Egnyte Z: drive sanity check
+# 6. R: drive sanity check (Rigby Cloud share)
 # ---------------------------------------------------------------------------
-Step "Egnyte Z: share check"
-$inputDir  = 'Z:\Shared\Rigby Cloud\24 - AI Lab\Input'
-$outputDir = 'Z:\Shared\Rigby Cloud\24 - AI Lab\Output'
+Step "R: drive (Rigby Cloud) check"
+$inputDir  = 'R:\24 - AI Lab\Input'
+$outputDir = 'R:\24 - AI Lab\Output'
+if (-not (Test-Path 'R:\')) {
+    Warn "R:\ not mapped on this machine."
+    Warn "If this is a non-IT-setup box, run: $AppDir\agent\deploy\map-r-drive.ps1"
+}
 if (-not (Test-Path $inputDir))  { Warn "INPUT  not accessible: $inputDir" } else { Ok "INPUT  ok: $inputDir" }
 if (-not (Test-Path $outputDir)) { Warn "OUTPUT not accessible: $outputDir" } else { Ok "OUTPUT ok: $outputDir" }
 

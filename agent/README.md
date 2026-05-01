@@ -14,8 +14,8 @@ Two long-running services + a one-shot CLI:
 Both services use these env-configurable paths (defaults are the Z: share):
 
 ```
-AI_LAB_INPUT  = Z:\Shared\Rigby Cloud\24 - AI Lab\Input
-AI_LAB_OUTPUT = Z:\Shared\Rigby Cloud\24 - AI Lab\Output
+AI_LAB_INPUT  = R:\24 - AI Lab\Input
+AI_LAB_OUTPUT = R:\24 - AI Lab\Output
 ```
 
 Each render is one `<job_id>` subfolder under each:
@@ -129,3 +129,9 @@ GET /api/health            →  { input_dir, output_dir, watcher_alive, watcher_
   paths (Egnyte syncs to Zak's Z:).
 - `watcher.py` stays exactly the same on Zak's machine.
 - Frontend `VITE_BRIDGE_URL` flips to `https://ai.rigbyandrigby.com/api`.
+
+## Drive layout
+
+R:\ is the studio's Rigby Cloud share — IT maps it on every workstation. On
+a non-IT-setup machine (e.g. Yuchen's home desktop) you have Z:\Shared\Rigby Cloud
+instead — run `agent\deploy\map-r-drive.ps1` once to alias R: → Z:\Shared\Rigby Cloud.

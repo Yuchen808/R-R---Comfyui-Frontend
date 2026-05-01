@@ -23,8 +23,8 @@ Run:
   DRY_RUN=true python watcher.py
 
 Env vars:
-  AI_LAB_INPUT  default: Z:\\Shared\\Rigby Cloud\\24 - AI Lab\\Input
-  AI_LAB_OUTPUT default: Z:\\Shared\\Rigby Cloud\\24 - AI Lab\\Output
+  AI_LAB_INPUT  default: R:\\24 - AI Lab\\Input
+  AI_LAB_OUTPUT default: R:\\24 - AI Lab\\Output
   COMFY_URL     default: http://localhost:8188
   DRY_RUN       default: false
   POLL_SCAN_SEC default: 5  (re-scan input dir every N seconds even without events)
@@ -50,8 +50,8 @@ except ImportError:
 from comfy import WORKFLOW_CONFIGS, run_workflow
 
 
-INPUT_DIR = Path(os.environ.get("AI_LAB_INPUT", r"Z:\Shared\Rigby Cloud\24 - AI Lab\Input"))
-OUTPUT_DIR = Path(os.environ.get("AI_LAB_OUTPUT", r"Z:\Shared\Rigby Cloud\24 - AI Lab\Output"))
+INPUT_DIR = Path(os.environ.get("AI_LAB_INPUT", r"R:\24 - AI Lab\Input"))
+OUTPUT_DIR = Path(os.environ.get("AI_LAB_OUTPUT", r"R:\24 - AI Lab\Output"))
 COMFY_URL = os.environ.get("COMFY_URL", "http://localhost:8188")
 DRY_RUN = os.environ.get("DRY_RUN", "false").lower() == "true"
 POLL_SCAN_SEC = int(os.environ.get("POLL_SCAN_SEC", "5"))
