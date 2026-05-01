@@ -1,0 +1,173 @@
+{
+  "_meta": {
+    "name": "Image to Video",
+    "source": "7.0_Image-to-Video_Wan.json (Zak)",
+    "model": "Wan 2.2 i2v A14B (lightx2v 4-step, GGUF Q5_1)",
+    "agent_inputs": {
+      "input_image": { "node": "113", "field": "image" },
+      "prompt_positive": { "node": "112", "field": "text" },
+      "duration_seconds": { "node": "205", "field": "value" },
+      "frame_rate": { "node": "122", "field": "frame_rate" },
+      "loop": { "node": "122", "field": "pingpong" },
+      "width": { "node": "203", "field": "value" },
+      "height": { "node": "204", "field": "value" },
+      "seed_high_noise": { "node": "114", "field": "noise_seed" },
+      "seed_low_noise": { "node": "119", "field": "noise_seed" }
+    },
+    "agent_outputs": {
+      "video": { "node": "122", "format": "mp4 / h264" }
+    },
+    "custom_nodes_required": [
+      "ComfyUI-GGUF (UnetLoaderGGUF)",
+      "ComfyUI-VideoHelperSuite (VHS_VideoCombine)",
+      "ComfyUI-Easy-Use (easy int, easy simpleMath)"
+    ],
+    "notes": "Total frames computed as (duration_seconds * 16) + 1 by node 207. Two-stage sampler: high-noise model (steps 0-3) then low-noise (steps 3-6)."
+  },
+  "109": {
+    "inputs": { "shift": 5, "model": ["124", 0] },
+    "class_type": "ModelSamplingSD3",
+    "_meta": { "title": "ModelSamplingSD3" }
+  },
+  "110": {
+    "inputs": {
+      "clip_name": "umt5_xxl_fp8_e4m3fn_scaled.safetensors",
+      "type": "wan",
+      "device": "default"
+    },
+    "class_type": "CLIPLoader",
+    "_meta": { "title": "Load CLIP" }
+  },
+  "111": {
+    "inputs": { "vae_name": "wan_2.1_vae.safetensors" },
+    "class_type": "VAELoader",
+    "_meta": { "title": "Load VAE" }
+  },
+  "112": {
+    "inputs": {
+      "text": "__PROMPT_POSITIVE__",
+      "clip": ["110", 0]
+    },
+    "class_type": "CLIPTextEncode",
+    "_meta": { "title": "3. Add Animation Prompt" }
+  },
+  "113": {
+    "inputs": { "image": "__INPUT_IMAGE__" },
+    "class_type": "LoadImage",
+    "_meta": { "title": "2. Load Image" }
+  },
+  "114": {
+    "inputs": {
+      "add_noise": "enable",
+      "noise_seed": 0,
+      "steps": 6,
+      "cfg": 1,
+      "sampler_name": "euler",
+      "scheduler": "beta",
+      "start_at_step": 0,
+      "end_at_step": 3,
+      "return_with_leftover_noise": "enable",
+      "model": ["120", 0],
+      "positive": ["121", 0],
+      "negative": ["121", 1],
+      "latent_image": ["121", 2]
+    },
+    "class_type": "KSamplerAdvanced",
+    "_meta": { "title": "KSampler (Advanced)" }
+  },
+  "115": {
+    "inputs": { "samples": ["119", 0], "vae": ["111", 0] },
+    "class_type": "VAEDecode",
+    "_meta": { "title": "VAE Decode" }
+  },
+  "119": {
+    "inputs": {
+      "add_noise": "disable",
+      "noise_seed": 0,
+      "steps": 6,
+      "cfg": 1,
+      "sampler_name": "euler",
+      "scheduler": "beta",
+      "start_at_step": 3,
+      "end_at_step": 6,
+      "return_with_leftover_noise": "disable",
+      "model": ["109", 0],
+      "positive": ["121", 0],
+      "negative": ["121", 1],
+      "latent_image": ["114", 0]
+    },
+    "class_type": "KSamplerAdvanced",
+    "_meta": { "title": "KSampler (Advanced)" }
+  },
+  "120": {
+    "inputs": { "shift": 5, "model": ["123", 0] },
+    "class_type": "ModelSamplingSD3",
+    "_meta": { "title": "ModelSamplingSD3" }
+  },
+  "121": {
+    "inputs": {
+      "width": ["203", 0],
+      "height": ["204", 0],
+      "length": ["207", 0],
+      "batch_size": 1,
+      "positive": ["112", 0],
+      "negative": ["201", 0],
+      "vae": ["111", 0],
+      "start_image": ["113", 0]
+    },
+    "class_type": "WanImageToVideo",
+    "_meta": { "title": "WanImageToVideo" }
+  },
+  "122": {
+    "inputs": {
+      "frame_rate": 16,
+      "loop_count": 0,
+      "filename_prefix": "WanVideo",
+      "format": "video/h264-mp4",
+      "pix_fmt": "yuv420p",
+      "crf": 19,
+      "save_metadata": false,
+      "trim_to_audio": false,
+      "pingpong": false,
+      "save_output": true,
+      "images": ["115", 0]
+    },
+    "class_type": "VHS_VideoCombine",
+    "_meta": { "title": "Video Combine" }
+  },
+  "123": {
+    "inputs": { "unet_name": "wan2.2_i2v_A14b_high_noise_lightx2v_4step-Q5_1.gguf" },
+    "class_type": "UnetLoaderGGUF",
+    "_meta": { "title": "Unet Loader (GGUF) - High" }
+  },
+  "124": {
+    "inputs": { "unet_name": "wan2.2_i2v_A14b_low_noise_lightx2v_4step-Q5_1.gguf" },
+    "class_type": "UnetLoaderGGUF",
+    "_meta": { "title": "Unet Loader (GGUF) - Low" }
+  },
+  "201": {
+    "inputs": { "conditioning": ["112", 0] },
+    "class_type": "ConditioningZeroOut",
+    "_meta": { "title": "ConditioningZeroOut" }
+  },
+  "203": {
+    "inputs": { "value": 1280 },
+    "class_type": "easy int",
+    "_meta": { "title": "Width" }
+  },
+  "204": {
+    "inputs": { "value": 720 },
+    "class_type": "easy int",
+    "_meta": { "title": "Height" }
+  },
+  "205": {
+    "inputs": { "value": 5 },
+    "class_type": "easy int",
+    "_meta": { "title": "Duration 1-5 Seconds" }
+  },
+  "207": {
+    "inputs": { "value": "(a*16)+1", "a": ["205", 0] },
+    "class_type": "easy simpleMath",
+    "_meta": { "title": "easy simpleMath" }
+  }
+}
