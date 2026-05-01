@@ -33,3 +33,15 @@ public/fonts/*.woff
 public/fonts/*.woff2
 public/fonts/*.ttf
 public/fonts/*.otf
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+agent/venv/
+agent/.venv/
+
+# Local dev artifacts
+agent/*-hydrated.json
+agent/*-result.png
+agent/*-result.mp4

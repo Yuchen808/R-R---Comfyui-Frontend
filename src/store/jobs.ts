@@ -2,6 +2,9 @@ import { useEffect, useState } from 'react';
 import type { Job, JobInputFile, ParamValue, WorkflowSlug } from '../types';
 
 const STORAGE_KEY = 'rr-comfy-jobs-v4';
+const BRIDGE_URL = (import.meta.env.VITE_BRIDGE_URL as string | undefined)?.replace(/\/$/, '') ?? null;
+const POLL_INTERVAL_MS = 3000;
+
 const listeners = new Set<() => void>();
 let cache: Job[] | null = null;
 
@@ -57,7 +60,19 @@ export const createJob = (params: {
     errorMessage: null,
   };
   persist([job, ...load()]);
-  simulateJob(job.id, params.etaSeconds);
+
+  if (BRIDGE_URL) {
+    submitToBridge(job).catch((err) => {
+      console.error('[jobs] bridge submit failed', err);
+      updateJob(job.id, {
+        status: 'failed',
+        errorMessage: err instanceof Error ? err.message : String(err),
+      });
+    });
+  } else {
+    simulateJob(job.id, params.etaSeconds);
+  }
+
   return job;
 };
 
@@ -73,6 +88,74 @@ export const deleteJob = (id: string) => {
 export const clearCompleted = () => {
   persist(load().filter((j) => j.status !== 'complete' && j.status !== 'failed'));
 };
+
+const dataUrlToBlob = async (dataUrl: string): Promise<Blob> => {
+  const resp = await fetch(dataUrl);
+  return resp.blob();
+};
+
+async function submitToBridge(job: Job): Promise<void> {
+  if (!BRIDGE_URL) return;
+
+  const fd = new FormData();
+  fd.append('workflow', job.workflow);
+  fd.append('prompt', job.prompt ?? '');
+  fd.append('params', JSON.stringify(job.params));
+  if (job.presetId) fd.append('preset_id', job.presetId);
+
+  for (const [slotId, input] of Object.entries(job.inputs)) {
+    const blob = await dataUrlToBlob(input.dataUrl);
+    fd.append(`image_${slotId}`, blob, input.fileName);
+  }
+
+  const resp = await fetch(`${BRIDGE_URL}/api/render`, { method: 'POST', body: fd });
+  if (!resp.ok) {
+    const text = await resp.text();
+    throw new Error(`bridge ${resp.status}: ${text}`);
+  }
+  const data = (await resp.json()) as { job_id: string };
+  pollBridge(job.id, data.job_id);
+}
+
+function pollBridge(localId: string, remoteId: string) {
+  let stopped = false;
+  const tick = async () => {
+    if (stopped) return;
+    try {
+      const resp = await fetch(`${BRIDGE_URL}/api/job/${remoteId}/status`);
+      if (resp.ok) {
+        const status = (await resp.json()) as {
+          status: Job['status'];
+          progress?: number;
+          eta_seconds?: number;
+          error_message?: string;
+          result_file?: string;
+        };
+        const patch: Partial<Job> = {
+          status: status.status,
+          progress: status.progress ?? 0,
+          etaSeconds: status.eta_seconds ?? null,
+        };
+        if (status.status === 'complete') {
+          patch.resultUrl = `${BRIDGE_URL}/api/job/${remoteId}/result`;
+        }
+        if (status.status === 'failed') {
+          patch.errorMessage = status.error_message ?? 'Render failed';
+        }
+        updateJob(localId, patch);
+
+        if (status.status === 'complete' || status.status === 'failed') {
+          stopped = true;
+          return;
+        }
+      }
+    } catch (err) {
+      console.warn('[jobs] poll error', err);
+    }
+    setTimeout(tick, POLL_INTERVAL_MS);
+  };
+  setTimeout(tick, 800);
+}
 
 const simulateJob = (id: string, totalSeconds: number) => {
   const startedAt = Date.now();
@@ -119,3 +202,6 @@ export const useJob = (id: string | undefined): Job | undefined => {
   const jobs = useJobs();
   return id ? jobs.find((j) => j.id === id) : undefined;
 };
+
+export const isUsingBridge = (): boolean => BRIDGE_URL !== null;
+export const getBridgeUrl = (): string | null => BRIDGE_URL;

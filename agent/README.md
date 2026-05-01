@@ -1,90 +1,131 @@
-# Agent — workflow runner
+# Agent — bridge + watcher
 
-Single-file Python script that:
+Two long-running services + a one-shot CLI:
 
-1. Loads a sanitized template from `../workflows/`
-2. Hydrates the placeholders (`__PROMPT_POSITIVE__`, `__INPUT_IMAGE__`, ...) with real user inputs
-3. Either prints the result (dry-run) or POSTs to a real ComfyUI HTTP API and polls for output
+| File | What | Where it runs |
+|---|---|---|
+| `bridge.py` | HTTP server the **frontend** talks to. Receives uploads, writes to Egnyte input folder, exposes status/result endpoints. | Anyone on the studio network (initially Yuchen's laptop; later: Cloudflare Worker port). |
+| `watcher.py` | Long-running daemon that watches the Egnyte input folder, calls ComfyUI, writes to the output folder. | **Zak's render box.** Single instance. |
+| `agent.py` | One-shot CLI. Hydrate + submit a single workflow. Useful for smoke tests and verifying JSON correctness. | Wherever. |
+| `comfy.py` | Shared logic — workflow configs, hydration, ComfyUI HTTP client. | Imported by the others. |
 
-## Setup
+## Folder contract
+
+Both services use these env-configurable paths (defaults are the Z: share):
+
+```
+AI_LAB_INPUT  = Z:\Shared\Rigby Cloud\24 - AI Lab\Input
+AI_LAB_OUTPUT = Z:\Shared\Rigby Cloud\24 - AI Lab\Output
+```
+
+Each render is one `<job_id>` subfolder under each:
+
+```
+Input/job_1714583200000_abc123/
+├── manifest.json     ← workflow, prompt, params, file mapping
+├── main.png          ← the user's primary upload
+└── reference.jpg     ← only for instruct-image
+
+Output/job_1714583200000_abc123/
+├── status.json       ← progressively written; the bridge polls this
+├── result.png        ← or result.mp4 once complete
+└── error.log         ← if failed
+```
+
+A heartbeat file lives at `Output/_heartbeat.json` (updated every 60s by the watcher).
+
+## Setup (one time)
 
 ```bash
 cd agent
 python -m venv venv
-# Windows:
-venv\Scripts\activate
-# macOS/Linux:
-source venv/bin/activate
+venv\Scripts\activate          # Windows
+# source venv/bin/activate     # macOS/Linux
 
 pip install -r requirements.txt
 ```
 
-## Mode 1 — Dry-run (no network, no ComfyUI needed)
+## Run — local mock (no ComfyUI needed)
 
-Verifies your hydration logic. Produces a JSON file you can drop onto Zak's ComfyUI canvas.
+This proves the entire frontend → bridge → folder → watcher → folder → bridge → frontend
+loop works on a single machine, even without a real render box.
+
+**Terminal 1 — bridge** (handles uploads from the browser):
+```bash
+python bridge.py
+# listening on http://localhost:8000
+```
+
+**Terminal 2 — watcher in dry-run mode** (fakes the render):
+```bash
+# Windows PowerShell
+$env:DRY_RUN="true"; python watcher.py
+
+# Or bash
+DRY_RUN=true python watcher.py
+```
+
+**Terminal 3 — frontend** (point at the bridge):
+```bash
+cd ..   # back to project root
+echo VITE_BRIDGE_URL=http://localhost:8000 > .env.local
+npm run dev
+# open http://localhost:5173
+```
+
+Drop two images into Instruct Image, click **Render**. The bridge writes a job folder
+to `Z:\...\Input\<job_id>\`, the watcher picks it up, simulates a 6-second render
+(progress bar + status updates), copies the input to output, and the frontend's
+output panel shows the "result" with a Download button.
+
+## Run — real ComfyUI on Zak's box
+
+Only step 2 changes — the watcher actually calls ComfyUI:
+
+```bash
+$env:COMFY_URL="http://localhost:8188"; python watcher.py
+```
+
+The bridge stays where it is (Yuchen's laptop or wherever the frontend reaches).
+The watcher runs on Zak's machine. Both see the same Z: paths because Egnyte
+syncs the folders.
+
+## CLI smoke test (no bridge, no watcher)
 
 ```bash
 python agent.py instruct-image \
-  --prompt "swap the marble fireplace for travertine, relight as evening" \
-  --image main=./samples/room.png \
-  --image reference=./samples/evening_lighting.jpg \
-  --param steps=4 --param cfg=1 \
-  --dry-run \
-  --output hydrated.json
-```
-
-```bash
-python agent.py image-to-video \
-  --prompt "slow camera dolly forward, ambient daylight, soft fabric drift" \
-  --image main=./samples/render.png \
-  --param duration=5 --param frame_rate=24 \
-  --dry-run \
-  --output hydrated.json
-```
-
-Then:
-1. Open ComfyUI in your browser
-2. Drag `hydrated.json` onto the canvas
-3. Click **Queue Prompt**
-4. If it renders → your agent's hydration is correct ✅
-
-## Mode 2 — Real run (requires reachable ComfyUI)
-
-Actually submits and downloads the result.
-
-```bash
-python agent.py instruct-image \
-  --prompt "..." \
+  --prompt "swap the marble fireplace for travertine" \
   --image main=./samples/room.png \
   --image reference=./samples/evening.jpg \
-  --comfy-url http://zak-workstation.tail-scale.ts.net:8188 \
-  --output result.png \
-  --timeout 300
+  --param steps=4 --param cfg=1 \
+  --dry-run --output hydrated.json
 ```
 
-For local testing if you've installed ComfyUI yourself:
-```bash
---comfy-url http://localhost:8188
+The dry-run just writes a hydrated JSON file you can drag onto Zak's ComfyUI
+canvas to verify the agent's hydration logic produces a valid workflow.
+
+## Endpoints (bridge)
+
+```
+POST /api/render
+  multipart fields:
+    workflow:    "image-to-video" | "instruct-image"
+    prompt:      string
+    params:      JSON-string of { [param_id]: value }
+    preset_id:   optional string
+    image_main:  file
+    image_reference: file (Instruct Image only)
+  →  { job_id, status_url, result_url }
+
+GET /api/job/{id}/status   →  { status, progress, eta_seconds?, error_message? }
+GET /api/job/{id}/result   →  binary result file
+GET /api/health            →  { input_dir, output_dir, watcher_alive, watcher_age_seconds }
 ```
 
-## Workflow configs
+## Production path (later)
 
-| Workflow | Required image slots | Tunable params |
-|---|---|---|
-| `image-to-video` | `main` | `duration`, `frame_rate`, `loop`, `width`, `height` |
-| `instruct-image` | `main`, `reference` | `steps`, `cfg`, `lora_strength`, `color_match_strength`, `seed`, `input_megapixels` |
-
-The full node mappings live in `WORKFLOW_CONFIGS` at the top of `agent.py` — update them when the workflow JSONs change.
-
-## What this is NOT (yet)
-
-- A long-running daemon — it's a one-shot CLI
-- A folder watcher (the Egnyte folder-watch loop is a separate component still to build)
-- An HTTP server the frontend can hit (next step: wrap this script in a tiny FastAPI server so the frontend can POST jobs to it)
-
-## Troubleshooting
-
-- **"Missing required image input"** — check the `--image slot=path` keys match the workflow's slot names (`main`, `reference`)
-- **"Workflow template not found"** — run from inside `agent/` with the `workflows/` directory at `../workflows/`
-- **/prompt returns 400** — your hydrated JSON is invalid. Run `--dry-run` first and load it manually in ComfyUI to see the actual error
-- **Timeout** — increase `--timeout`, or check if ComfyUI is OOM (FLUX 2 9B + Wan 2.2 14B both want >16GB VRAM)
+- `bridge.py` stays as the source of truth for the API contract; port to a Cloudflare
+  Worker that uses Egnyte REST API to write to the same `/Shared/Rigby Cloud/24 - AI Lab/`
+  paths (Egnyte syncs to Zak's Z:).
+- `watcher.py` stays exactly the same on Zak's machine.
+- Frontend `VITE_BRIDGE_URL` flips to `https://ai.rigbyandrigby.com/api`.
