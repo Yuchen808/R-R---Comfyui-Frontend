@@ -1,6 +1,7 @@
 /** @type {import('tailwindcss').Config} */
 export default {
   content: ['./index.html', './src/**/*.{ts,tsx}'],
+  darkMode: 'class',
   theme: {
     extend: {
       fontFamily: {
@@ -30,17 +31,17 @@ export default {
       },
       colors: {
         ink: {
-          950: '#0A0A0A',
-          900: '#111111',
-          800: '#1A1A1A',
-          700: '#262626',
-          600: '#3D3D3D',
-          500: '#737373',
-          400: '#A3A3A3',
-          300: '#D4D4D4',
-          200: '#E5E5E5',
-          100: '#F5F5F5',
-          50: '#FAFAFA',
+          50: 'rgb(var(--c-ink-50) / <alpha-value>)',
+          100: 'rgb(var(--c-ink-100) / <alpha-value>)',
+          200: 'rgb(var(--c-ink-200) / <alpha-value>)',
+          300: 'rgb(var(--c-ink-300) / <alpha-value>)',
+          400: 'rgb(var(--c-ink-400) / <alpha-value>)',
+          500: 'rgb(var(--c-ink-500) / <alpha-value>)',
+          600: 'rgb(var(--c-ink-600) / <alpha-value>)',
+          700: 'rgb(var(--c-ink-700) / <alpha-value>)',
+          800: 'rgb(var(--c-ink-800) / <alpha-value>)',
+          900: 'rgb(var(--c-ink-900) / <alpha-value>)',
+          950: 'rgb(var(--c-ink-950) / <alpha-value>)',
         },
         accent: {
           DEFAULT: '#80EF80',

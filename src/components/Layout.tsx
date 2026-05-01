@@ -1,5 +1,6 @@
 import { Link, NavLink, Outlet } from 'react-router-dom';
 import { useJobs } from '../store/jobs';
+import ThemeToggle from './ThemeToggle';
 
 const NAV = [
   { to: '/', label: 'Studio', end: true },
@@ -49,9 +50,12 @@ export default function Layout() {
             ))}
           </nav>
 
-          <div className="hidden md:flex items-center gap-2 text-[11px] font-mono text-ink-500">
-            <span className="h-1.5 w-1.5 rounded-full bg-accent animate-pulse-slow" />
-            <span>agent · live</span>
+          <div className="flex items-center gap-3">
+            <div className="hidden md:flex items-center gap-2 text-[11px] font-mono text-ink-500">
+              <span className="h-1.5 w-1.5 rounded-full bg-accent animate-pulse-slow" />
+              <span>agent · live</span>
+            </div>
+            <ThemeToggle />
           </div>
         </div>
       </header>
@@ -67,7 +71,7 @@ export default function Layout() {
             <span className="text-ink-700">/</span>
             <span>ALLECT AI LAB</span>
             <span className="text-ink-700">/</span>
-            <span>v0.3.0</span>
+            <span>v0.4.0</span>
           </div>
           <div className="flex items-center gap-4">
             <span>Internal — not for client distribution</span>

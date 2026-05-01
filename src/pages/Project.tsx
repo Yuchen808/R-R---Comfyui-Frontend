@@ -119,25 +119,24 @@ function ProjectGridCard({ project }: { project: Project }) {
       <div
         className="aspect-[4/3] rounded-xl border border-ink-800 overflow-hidden mb-3 relative transition-all duration-300 group-hover:border-ink-700 group-hover:-translate-y-0.5"
         style={{
-          backgroundImage: `radial-gradient(at 30% 20%, hsla(${project.hue}, 60%, 35%, 0.45) 0, transparent 55%), linear-gradient(135deg, hsl(${project.hue}, 18%, 14%) 0%, hsl(${project.hue}, 12%, 7%) 100%)`,
+          backgroundImage: `radial-gradient(at 30% 20%, hsl(${project.hue} var(--tile-glow-s) var(--tile-glow-l) / var(--tile-glow-a)) 0, transparent 55%), linear-gradient(135deg, hsl(${project.hue} var(--tile-base-s) var(--tile-base-l)) 0%, hsl(${project.hue} var(--tile-deep-s) var(--tile-deep-l)) 100%)`,
+          color: 'rgb(var(--tile-text))',
         }}
       >
         <div className="absolute inset-0 grid-lines opacity-30" />
-        <div className="absolute top-3 left-3 right-3 flex items-center justify-between text-[10px] font-mono uppercase tracking-widest">
-          <span className="text-ink-300/80">{project.location}</span>
-          <span className="text-ink-300/70">{project.status}</span>
+        <div className="absolute top-3 left-3 right-3 flex items-center justify-between text-[10px] font-mono uppercase tracking-widest opacity-80">
+          <span>{project.location}</span>
+          <span className="opacity-90">{project.status}</span>
         </div>
-        <div className="absolute bottom-3 left-3 right-3 flex items-center justify-between text-[10px] font-mono">
-          <span
-            className="inline-flex items-center gap-1.5 text-ink-300/80"
-          >
+        <div className="absolute bottom-3 left-3 right-3 flex items-center justify-between text-[10px] font-mono opacity-80">
+          <span className="inline-flex items-center gap-1.5">
             <span
               className="h-1.5 w-1.5 rounded-full"
-              style={{ background: `hsl(${project.hue}, 70%, 60%)` }}
+              style={{ background: `hsl(${project.hue}, 70%, 50%)` }}
             />
             {project.client}
           </span>
-          <span className="text-ink-300/70">{project.renderCount} renders</span>
+          <span>{project.renderCount} renders</span>
         </div>
       </div>
       <div className="flex items-center justify-between gap-2">
