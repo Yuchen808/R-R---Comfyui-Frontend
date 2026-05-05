@@ -16,17 +16,22 @@ export default function Layout() {
       <header className="sticky top-0 z-40 border-b border-ink-800/80 backdrop-blur-md bg-ink-950/70">
         <div className="mx-auto max-w-7xl px-6 lg:px-10 h-14 flex items-center justify-between">
           <Link to="/" className="flex items-center gap-3 group">
-            <div className="relative h-2.5 w-2.5">
-              <span className="absolute inset-0 rounded-full bg-accent" />
-              <span className="absolute inset-0 rounded-full bg-accent animate-ping opacity-40" />
-            </div>
-            <span className="text-[15px] tracking-tight">
-              R&amp;R <span className="text-ink-500">·</span>{' '}
-              <span className="text-ink-300">ComfyUI Studio</span>
+            <img
+              src="/brand/rr-logo-darkmode.png"
+              alt="Rigby & Rigby"
+              className="h-5 w-auto hidden dark:block"
+            />
+            <img
+              src="/brand/rr-logo-lightmode.png"
+              alt="Rigby & Rigby"
+              className="h-5 w-auto block dark:hidden"
+            />
+            <span className="text-[15px] tracking-tight text-ink-300 translate-y-[3px]">
+              <span className="text-ink-500">·</span> ComfyUI Studio
             </span>
           </Link>
 
-          <nav className="flex items-center gap-1">
+          <nav className="flex items-center gap-1 translate-y-[3px]">
             {NAV.map((item) => (
               <NavLink
                 key={item.to}
@@ -50,7 +55,7 @@ export default function Layout() {
             ))}
           </nav>
 
-          <div className="flex items-center gap-3">
+          <div className="flex items-center gap-3 translate-y-[3px]">
             <div className="hidden md:flex items-center gap-2 text-[11px] font-mono text-ink-500">
               <span className="h-1.5 w-1.5 rounded-full bg-accent animate-pulse-slow" />
               <span>agent · live</span>
