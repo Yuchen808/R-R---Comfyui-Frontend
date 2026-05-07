@@ -81,8 +81,10 @@ if (Test-Path "$AppDir\.git") {
         Info "git pull"
         Push-Location $AppDir
         try {
-            & git fetch origin main 2>&1 | Out-Null
-            & git reset --hard origin/main 2>&1 | Out-Null
+            & git fetch origin main 2>$null
+            if ($LASTEXITCODE -ne 0) { Fail "git fetch failed (exit $LASTEXITCODE)" }
+            & git reset --hard origin/main 2>$null
+            if ($LASTEXITCODE -ne 0) { Fail "git reset failed (exit $LASTEXITCODE)" }
             Ok "updated to origin/main"
         } finally { Pop-Location }
     } else {
@@ -92,7 +94,8 @@ if (Test-Path "$AppDir\.git") {
     if ($gitAvailable) {
         Info "git clone $RepoUrl"
         if (Test-Path $AppDir) { Remove-Item $AppDir -Recurse -Force }
-        & git clone $RepoUrl $AppDir 2>&1 | Out-Null
+        & git clone $RepoUrl $AppDir 2>$null
+        if ($LASTEXITCODE -ne 0) { Fail "git clone failed (exit $LASTEXITCODE)" }
         Ok "cloned"
     } else {
         Info "git not found — downloading ZIP fallback"
