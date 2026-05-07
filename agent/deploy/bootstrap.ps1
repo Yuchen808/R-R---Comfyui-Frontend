@@ -1,4 +1,4 @@
-# R&R ComfyUI Studio — Zak's render-box bootstrap
+﻿# R&R ComfyUI Studio - Zak's render-box bootstrap
 #
 # Run from PowerShell (no admin needed). Idempotent: safe to re-run.
 #
@@ -37,7 +37,7 @@ function Fail($msg)  { Write-Host "    [fail] $msg" -ForegroundColor Red; throw 
 
 Write-Host ""
 Write-Host "###########################################" -ForegroundColor Green
-Write-Host "#  R&R ComfyUI Studio — render-box setup  #" -ForegroundColor Green
+Write-Host "#  R&R ComfyUI Studio - render-box setup  #" -ForegroundColor Green
 Write-Host "###########################################" -ForegroundColor Green
 Write-Host ""
 
@@ -88,7 +88,7 @@ if (Test-Path "$AppDir\.git") {
             Ok "updated to origin/main"
         } finally { Pop-Location }
     } else {
-        Warn "repo present but git not installed — skipping update"
+        Warn "repo present but git not installed - skipping update"
     }
 } else {
     if ($gitAvailable) {
@@ -98,7 +98,7 @@ if (Test-Path "$AppDir\.git") {
         if ($LASTEXITCODE -ne 0) { Fail "git clone failed (exit $LASTEXITCODE)" }
         Ok "cloned"
     } else {
-        Info "git not found — downloading ZIP fallback"
+        Info "git not found - downloading ZIP fallback"
         $tmpZip = "$env:TEMP\rr-comfy-$(Get-Random).zip"
         Invoke-WebRequest -Uri $ZipFallback -OutFile $tmpZip -UseBasicParsing
         if (Test-Path $AppDir) { Remove-Item $AppDir -Recurse -Force }
@@ -165,7 +165,7 @@ Step "Starting bridge + watcher + tunnel"
 
 $env:COMFY_URL = $ComfyUrl
 
-# bridge.py — port 8000
+# bridge.py - port 8000
 Start-Process -FilePath $VenvPython `
     -ArgumentList "$AppDir\agent\bridge.py" `
     -WorkingDirectory "$AppDir\agent" `
@@ -174,7 +174,7 @@ Start-Process -FilePath $VenvPython `
     -RedirectStandardError "$LogsDir\bridge.err"
 Ok "bridge.py started (logs: $LogsDir\bridge.log)"
 
-# watcher.py — Z:\ folder watch
+# watcher.py - Z:\ folder watch
 Start-Process -FilePath $VenvPython `
     -ArgumentList "$AppDir\agent\watcher.py" `
     -WorkingDirectory "$AppDir\agent" `
@@ -183,7 +183,7 @@ Start-Process -FilePath $VenvPython `
     -RedirectStandardError "$LogsDir\watcher.err"
 Ok "watcher.py started (logs: $LogsDir\watcher.log)  COMFY_URL=$ComfyUrl"
 
-# cloudflared tunnel — exposes :8000 to a public https URL
+# cloudflared tunnel - exposes :8000 to a public https URL
 Start-Process -FilePath $Cloudflared `
     -ArgumentList @('tunnel', '--url', 'http://localhost:8000', '--no-autoupdate') `
     -WindowStyle Hidden `
@@ -240,14 +240,14 @@ if ($tunnelUrl) {
 } else {
     Write-Host "#" -ForegroundColor Yellow
     Write-Host "#  Tunnel URL did not appear in 60s." -ForegroundColor Yellow
-    Write-Host "#  Check $LogsDir\tunnel.err — may be a network restriction." -ForegroundColor Yellow
+    Write-Host "#  Check $LogsDir\tunnel.err - may be a network restriction." -ForegroundColor Yellow
     Write-Host "#" -ForegroundColor Yellow
 }
 Write-Host "##############################################################" -ForegroundColor Green
 Write-Host ""
 Write-Host "Useful commands:" -ForegroundColor Gray
-Write-Host "  .\app\agent\deploy\stop.ps1       — stop everything"
-Write-Host "  .\app\agent\deploy\show-url.ps1   — re-print the tunnel URL"
-Write-Host "  Get-Content $LogsDir\bridge.log   — tail the bridge log"
-Write-Host "  Get-Content $LogsDir\watcher.log  — tail the watcher log"
+Write-Host "  .\app\agent\deploy\stop.ps1       - stop everything"
+Write-Host "  .\app\agent\deploy\show-url.ps1   - re-print the tunnel URL"
+Write-Host "  Get-Content $LogsDir\bridge.log   - tail the bridge log"
+Write-Host "  Get-Content $LogsDir\watcher.log  - tail the watcher log"
 Write-Host ""

@@ -1,4 +1,4 @@
-# Manual start — assumes bootstrap.ps1 has already been run.
+﻿# Manual start - assumes bootstrap.ps1 has already been run.
 # Idempotent: kills any stale processes first.
 #
 #   .\start.ps1
@@ -13,7 +13,7 @@ $Cloudflared = "$Root\bin\cloudflared.exe"
 $ComfyUrl    = if ($env:COMFY_URL) { $env:COMFY_URL } else { 'http://localhost:8188' }
 
 if (-not (Test-Path $VenvPython))  { Write-Host "Run bootstrap.ps1 first." -ForegroundColor Red; exit 1 }
-if (-not (Test-Path $Cloudflared)) { Write-Host "cloudflared missing — run bootstrap.ps1." -ForegroundColor Red; exit 1 }
+if (-not (Test-Path $Cloudflared)) { Write-Host "cloudflared missing - run bootstrap.ps1." -ForegroundColor Red; exit 1 }
 
 New-Item -ItemType Directory -Path $LogsDir -Force | Out-Null
 

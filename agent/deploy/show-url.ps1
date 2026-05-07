@@ -1,4 +1,4 @@
-# Re-print the tunnel URL from the saved file or by re-scanning the log.
+﻿# Re-print the tunnel URL from the saved file or by re-scanning the log.
 $saved = 'C:\AI-Lab\tunnel-url.txt'
 $logErr = 'C:\AI-Lab\logs\tunnel.err'
 $logOut = 'C:\AI-Lab\logs\tunnel.log'

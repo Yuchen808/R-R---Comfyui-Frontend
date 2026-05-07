@@ -1,4 +1,4 @@
-# Kill any running bridge.py / watcher.py / cloudflared processes started from C:\AI-Lab.
+﻿# Kill any running bridge.py / watcher.py / cloudflared processes started from C:\AI-Lab.
 $ErrorActionPreference = 'SilentlyContinue'
 
 $killed = 0

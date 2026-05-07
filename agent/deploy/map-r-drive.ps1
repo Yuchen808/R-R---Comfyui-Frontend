@@ -1,4 +1,4 @@
-# Map R: -> Z:\Shared\Rigby Cloud  for machines that aren't IT-imaged.
+﻿# Map R: -> Z:\Shared\Rigby Cloud  for machines that aren't IT-imaged.
 #
 # IT-setup machines already have R: pointing at the Rigby Cloud share. This
 # script gives a non-IT box (e.g. Yuchen's home desktop) the same drive layout.

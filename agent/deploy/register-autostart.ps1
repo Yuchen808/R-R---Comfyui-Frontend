@@ -1,4 +1,4 @@
-# Register start.ps1 to run at user login. Restarts on failure.
+﻿# Register start.ps1 to run at user login. Restarts on failure.
 # Run once. No admin required.
 $ErrorActionPreference = 'Stop'
 
@@ -7,7 +7,7 @@ $StartPs1  = "$Root\app\agent\deploy\start.ps1"
 $TaskName  = 'RR-ComfyUI-Studio-AutoStart'
 
 if (-not (Test-Path $StartPs1)) {
-    Write-Host "start.ps1 not found at $StartPs1 — run bootstrap.ps1 first." -ForegroundColor Red
+    Write-Host "start.ps1 not found at $StartPs1 - run bootstrap.ps1 first." -ForegroundColor Red
     exit 1
 }
 
