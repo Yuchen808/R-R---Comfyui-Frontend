@@ -20,10 +20,22 @@ const load = (): Job[] => {
   return cache!;
 };
 
+const stripDataUrls = (jobs: Job[]): Job[] =>
+  jobs.map((j) => ({
+    ...j,
+    inputs: Object.fromEntries(
+      Object.entries(j.inputs).map(([k, v]) => [k, { ...v, dataUrl: '' }]),
+    ),
+  }));
+
 const persist = (next: Job[]) => {
   cache = next;
   if (typeof window !== 'undefined') {
-    window.localStorage.setItem(STORAGE_KEY, JSON.stringify(next));
+    try {
+      window.localStorage.setItem(STORAGE_KEY, JSON.stringify(stripDataUrls(next)));
+    } catch (err) {
+      console.warn('[jobs] localStorage write failed (non-fatal)', err);
+    }
   }
   listeners.forEach((fn) => fn());
 };
