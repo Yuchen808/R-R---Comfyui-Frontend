@@ -164,6 +164,7 @@ Step "Stopping any previous services"
 Step "Starting bridge + watcher + tunnel"
 
 $env:COMFY_URL = $ComfyUrl
+$env:PYTHONUTF8 = '1'  # force Python I/O to UTF-8 so log lines with non-ASCII chars don't crash on Windows cp1252
 
 # bridge.py - port 8000
 Start-Process -FilePath $VenvPython `

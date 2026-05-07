@@ -22,6 +22,7 @@ New-Item -ItemType Directory -Path $LogsDir -Force | Out-Null
 
 Write-Host "Starting services..." -ForegroundColor Cyan
 $env:COMFY_URL = $ComfyUrl
+$env:PYTHONUTF8 = '1'  # force Python I/O to UTF-8 so log lines with non-ASCII chars don't crash on Windows cp1252
 
 Start-Process -FilePath $VenvPython `
     -ArgumentList "$AppDir\agent\bridge.py" `
